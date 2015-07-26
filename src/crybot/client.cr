@@ -17,7 +17,7 @@ class Client
         @client    = HTTP::Client.new(HOST, ssl: true)
     end
 
-    def request(method, path, body)
+    def request(method, path, body = nil)
         timestamp = Time.now.to_i.to_s
         nonce     = "hogeeeeeeeeeeee" # FIXME: make random stirng
 
