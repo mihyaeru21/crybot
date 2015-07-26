@@ -1,3 +1,0 @@
-module Crybot
-  VERSION = "0.0.1"
-end
