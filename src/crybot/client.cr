@@ -2,6 +2,7 @@ require "env"
 require "json"
 require "oauth"
 require "time"
+require "secure_random"
 
 class Client
     HOST        = "api.twitter.com"
@@ -17,15 +18,11 @@ class Client
         @client    = HTTP::Client.new(HOST, ssl: true)
     end
 
-    def request(method, path, body = nil)
-        timestamp = Time.now.to_i.to_s
-        nonce     = "hogeeeeeeeeeeee" # FIXME: make random stirng
-
+    def request(method, path, body = nil) # TODO: repalace body to params hash
         request = HTTP::Request.new(method, API_VERSION + path, body: body)
         request.headers["Host"]          = HOST
         request.headers["Content-type"]  = "application/x-www-form-urlencoded"
-        request.headers["Authorization"] = @signature.authorization_header(request, true, timestamp, nonce)
-
+        request.headers["Authorization"] = @signature.authorization_header(request, true, Time.now.to_i.to_s, SecureRandom.hex)
         return JSON.parse(@client.exec(request).body)
     end
 end
