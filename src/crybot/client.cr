@@ -22,7 +22,7 @@ class Client
         request = HTTP::Request.new(method, API_VERSION + path, body: body)
         request.headers["Host"]          = HOST
         request.headers["Content-type"]  = "application/x-www-form-urlencoded"
-        request.headers["Authorization"] = @signature.authorization_header(request, true, Time.now.to_i.to_s, SecureRandom.hex)
+        request.headers["Authorization"] = @signature.authorization_header(request, true, Time.utc_now.to_i.to_s, SecureRandom.hex(32))
         return JSON.parse(@client.exec(request).body)
     end
 end
