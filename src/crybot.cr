@@ -13,8 +13,8 @@ class Crybot
         @client.request("POST", "/statuses/update.json", "status=#{text}")
     end
 
-    def stream
-        @client.start_stream "GET", "/statuses/sample.json", do |body|
+    def user_stream
+        @client.start_stream "GET", "/user.json", do |body|
             p body
         end
     end

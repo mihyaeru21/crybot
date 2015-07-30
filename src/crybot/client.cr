@@ -9,7 +9,7 @@ require "http"
 
 class Client
     REST_HOST   = "api.twitter.com"
-    STREAM_HOST = "stream.twitter.com"
+    STREAM_HOST = "userstream.twitter.com"  # FIXME: user_stream only!!!
     API_VERSION = "/1.1"
 
     def initialize
@@ -48,6 +48,7 @@ class Client
             begin
                 yield JSON.parse(body)
             rescue
+                # FIXME: !!!
             end
             io.gets # Read \r\n
         end
