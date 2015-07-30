@@ -12,5 +12,11 @@ class Crybot
     def tweet(text)
         @client.request("POST", "/statuses/update.json", "status=#{text}")
     end
+
+    def stream
+        @client.start_stream "GET", "/statuses/sample.json", do |body|
+            p body
+        end
+    end
 end
 
