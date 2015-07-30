@@ -1,4 +1,5 @@
 require "./crybot/*"
+require "cgi"
 
 class Crybot
     def initialize
@@ -16,6 +17,20 @@ class Crybot
     def user_stream
         @client.start_stream "GET", "/user.json", do |body|
             p body
+            if text = body["text"]?
+                puts "text: #{text}"
+
+                # ツイート返すぞ！！！
+                if body["in_reply_to_user_id_str"]? == "3301456596"  # @crybot21
+                    if user = body["user"]? as Hash
+                        name = user["screen_name"]?
+                        text = (text as String).gsub("@crybot21 ", "")
+                        tweet_test = "@#{name} #{text}"
+                        p self.tweet(CGI.escape(tweet_test))
+                        p tweet_test
+                    end
+                end
+            end
         end
     end
 end

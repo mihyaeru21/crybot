@@ -42,20 +42,27 @@ class Client
         end
 
         # read body
+        line = ""
         while (chunk_size = io.gets.not_nil!.to_i(16)) > 0
-            body = io.read(chunk_size)
-            p body
-            begin
-                yield JSON.parse(body)
-            rescue
-                # FIXME: !!!
-            end
+            line += io.read(chunk_size)
             io.gets # Read \r\n
+
+            if line =~ /^\s+$/
+                line = ""
+                next
+            end
+
+            begin
+                yield JSON.parse(line) as Hash
+                line = ""
+            rescue e
+                p e # FIXME: !!!
+            end
         end
     end
 
     private def make_request(method, host, path, body = nil)
-        request = HTTP::Request.new(method, API_VERSION + path)
+        request = HTTP::Request.new(method, API_VERSION + path, body: body)
         request.headers["Host"]          = host
         request.headers["Content-type"]  = "application/x-www-form-urlencoded"
         request.headers["Authorization"] = @signature.authorization_header(request, true, Time.utc_now.to_i.to_s, SecureRandom.hex(32))
