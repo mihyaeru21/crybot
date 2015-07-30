@@ -64,7 +64,7 @@ class Client
     private def make_request(method, host, path, body = nil)
         request = HTTP::Request.new(method, API_VERSION + path, body: body)
         request.headers["Host"]          = host
-        request.headers["Content-type"]  = "application/x-www-form-urlencoded"
+        request.headers["Content-type"]  = "application/x-www-form-urlencoded" if method == "POST"
         request.headers["Authorization"] = @signature.authorization_header(request, true, Time.utc_now.to_i.to_s, SecureRandom.hex(32))
         return request
     end
