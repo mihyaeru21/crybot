@@ -44,7 +44,7 @@ class Client
         # read body
         line = ""
         while (chunk_size = io.gets.not_nil!.to_i(16)) > 0
-            line += io.read(chunk_size)
+            line += io.gets(chunk_size) as String
             io.gets # Read \r\n
 
             if line =~ /^\s+$/
