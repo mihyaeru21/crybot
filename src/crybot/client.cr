@@ -43,9 +43,12 @@ class Client
 
         # read body
         line = ""
-        while (chunk_size = io.gets.not_nil!.to_i(16)) > 0
+        while true
+            chunk_size_str = io.gets as String
+            next if chunk_size_str == "\r\n"
+            chunk_size = chunk_size_str.to_i(16)
+
             line += io.gets(chunk_size) as String
-            io.gets # Read \r\n
 
             if line =~ /^\s+$/
                 line = ""
