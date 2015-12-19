@@ -1,5 +1,5 @@
 require "./crybot/*"
-require "cgi"
+require "uri"
 
 class Crybot
     def initialize
@@ -26,7 +26,7 @@ class Crybot
                         name = user["screen_name"]?
                         text = (text as String).gsub("@crybot21 ", "")
                         tweet_test = "@#{name} #{text}"
-                        p self.tweet(CGI.escape(tweet_test))
+                        p self.tweet(URI.escape(tweet_test))
                         p tweet_test
                     end
                 end
