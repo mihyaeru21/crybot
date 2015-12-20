@@ -18,8 +18,9 @@ class Client
         access_token    = ENV["CRYBOT_ACCESS_TOKEN"]
         access_secret   = ENV["CRYBOT_ACCESS_SECRET"]
 
-        @signature   = OAuth::Signature.new(consumer_key, consumer_secret, access_token, access_secret)
-        @rest_client = HTTP::Client.new(REST_HOST, ssl: true)
+        @signature     = OAuth::Signature.new(consumer_key, consumer_secret, access_token, access_secret)
+        @rest_client   = HTTP::Client.new(REST_HOST, ssl: true)
+        @stream_client = HTTP::Client.new(STREAM_HOST, ssl: true)
     end
 
     def request(method, path, body = nil) # TODO: repalace body to params hash
@@ -30,36 +31,11 @@ class Client
     # naive implementation
     def start_stream(method, path)
         request = make_request(method, STREAM_HOST, path)
-        io = make_socket(request)
-        request.to_io(io)
-
-        # read header
-        headers = HTTP::Headers.new
-        while line = io.gets
-            break if line == "\r\n" || line == "\n"
-            name, value = HTTP.parse_header(line)
-            headers.add(name, value)
-        end
-
-        # read body
-        line = ""
-        while true
-            chunk_size_str = io.gets as String
-            next if chunk_size_str == "\r\n"
-            chunk_size = chunk_size_str.to_i(16)
-
-            line += io.gets(chunk_size) as String
-
-            if line =~ /^\s+$/
-                line = ""
-                next
-            end
-
-            begin
+        @stream_client.exec(request) do |response|
+            while true
+                line = response.body_io.gets as String
+                next if line =~ /^\s+$/
                 yield JSON.parse(line) as Hash
-                line = ""
-            rescue e
-                p e # FIXME: !!!
             end
         end
     end
@@ -70,12 +46,6 @@ class Client
         request.headers["Content-type"]  = "application/x-www-form-urlencoded" if method == "POST"
         request.headers["Authorization"] = @signature.authorization_header(request, true, Time.utc_now.epoch.to_s, SecureRandom.hex(32))
         return request
-    end
-
-    private def make_socket(request)
-        socket = TCPSocket.new(request.headers["Host"], 443)
-        socket.sync = false
-        return OpenSSL::SSL::Socket.new(socket)
     end
 end
 
